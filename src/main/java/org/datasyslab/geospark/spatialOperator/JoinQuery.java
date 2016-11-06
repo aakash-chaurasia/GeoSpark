@@ -13,6 +13,7 @@ import com.vividsolutions.jts.index.strtree.STRtree;
 
 import org.apache.spark.api.java.JavaPairRDD;
 
+import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
@@ -116,6 +117,10 @@ public class JoinQuery implements Serializable{
 		this.polygonRDD.SpatialPartition(objectRDD.grids);
 		this.sc=sc;
 	}
+
+    public JoinQuery() {
+
+    }
 
     /**
      * Spatial Join Query between a RectangleRDD and a PointRDD using index nested loop. The PointRDD should be indexed in advance.
@@ -404,6 +409,29 @@ public class JoinQuery implements Serializable{
         }
 
 
+    /**
+     * Spatial Join Query between a RectangleRDD and a PointRDD for group 17.
+     * @param pointRDD
+     * @param rectangleRDD
+     * @return
+     */
+    public JavaPairRDD<Envelope, HashSet<Point>> SpatialJoinQueryGroup17(PointRDD pointRDD,RectangleRDD rectangleRDD) {
+        //todo: Add logic, if this is cached, no need to calculate it again.
+        PointRDD objectRDD = pointRDD;
+        RectangleRDD queryWindowRDD = rectangleRDD;
+        JavaPairRDD<Envelope, HashSet<Point>> result = null;
+        List<Tuple2<Envelope, HashSet<Point>>> tupleList = new ArrayList<>();
 
-
+        if(pointRDD.gridPointRDD == null) {
+            throw new NullPointerException("Need to do spatial partitioning first, gridedSRDD is null");
+        }
+        List<Envelope> list = rectangleRDD.rawRectangleRDD.collect();
+        for ( Envelope e : list ) {
+            HashSet<Point> set = new HashSet<>();
+            set.addAll(RangeQuery.SpatialRangeQuery(objectRDD, e, 0).getRawPointRDD().collect());
+            tupleList.add(new Tuple2<>(e, set));
+        }
+        result = sc.parallelizePairs(tupleList);
+        return result;
+    }
 }

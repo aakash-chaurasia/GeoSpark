@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.datasyslab.geospark.spatialRDD.PointRDD;
 import org.datasyslab.geospark.spatialRDD.RectangleRDD;
 import org.datasyslab.geospark.spatialRDD.RectangleRDDTest;
 import org.junit.AfterClass;
@@ -245,10 +246,15 @@ public class RectangleJoinTest {
         	System.out.println("-----Rectangle join results are not consistent--Done---");
         	throw new Exception("Rectangle join results are not consistent!");
         }
-        
-        
     }
-
-
-
+    
+    @Test
+    public void SpatialJoinQueryGroup17() {
+        String InputLocation2 = "file://"+RectangleJoinTest.class.getClassLoader().getResource("arealm.csv").getPath();
+        PointRDD objectRDD = new PointRDD(sc, InputLocation2, 0, splitter, "rtree", 10);
+        RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
+        JoinQuery joinQuery = new JoinQuery(sc,objectRDD,rectangleRDD);
+        int res = joinQuery.SpatialJoinQueryGroup17(objectRDD, rectangleRDD).collect().size();
+        System.out.println("res = " + res);
+    }
 }
