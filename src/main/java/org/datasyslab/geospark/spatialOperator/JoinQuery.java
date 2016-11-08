@@ -429,7 +429,9 @@ public class JoinQuery implements Serializable{
         for ( Envelope e : list ) {
             HashSet<Point> set = new HashSet<>();
             set.addAll(RangeQuery.SpatialRangeQuery(objectRDD, e, 0).getRawPointRDD().collect());
-            tupleList.add(new Tuple2<>(e, set));
+            if(set.size() != 0) {
+                tupleList.add(new Tuple2<>(e, set));
+            }
         }
         result = sc.parallelizePairs(tupleList);
         return result;

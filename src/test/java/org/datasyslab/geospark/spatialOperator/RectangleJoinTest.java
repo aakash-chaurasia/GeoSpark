@@ -254,7 +254,17 @@ public class RectangleJoinTest {
         PointRDD objectRDD = new PointRDD(sc, InputLocation2, 0, splitter, "rtree", 10);
         RectangleRDD rectangleRDD = new RectangleRDD(sc, InputLocation, offset, splitter, gridType, numPartitions);
         JoinQuery joinQuery = new JoinQuery(sc,objectRDD,rectangleRDD);
-        int res = joinQuery.SpatialJoinQueryGroup17(objectRDD, rectangleRDD).collect().size();
+        long res = joinQuery.SpatialJoinQueryGroup17(objectRDD, rectangleRDD).count();
         System.out.println("res = " + res);
+
+        long total = 0;
+        int n = 1000;
+        for (int i = 0; i < n; i++) {
+            long start = System.currentTimeMillis();
+
+            long end = System.currentTimeMillis();
+            total += end - start;
+        }
+        System.out.println(total/n);
     }
 }
